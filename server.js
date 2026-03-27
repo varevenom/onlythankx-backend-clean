@@ -8,5 +8,5 @@ app.get("/",(req,res)=> {  res.send(" My backend is LIVE!");
 });
 
 app.listen(PORT,() => {
- console.log('Server running on port ${PORT}`);
+ console.log(`Server running on port ${PORT}`);
 });
