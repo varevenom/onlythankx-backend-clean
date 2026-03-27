@@ -1,46 +1,64 @@
-const express = require("express");
-const app = express();
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OnlyThanks 🚀</title>
+</head>
+<body>
 
-app.use(express.json());
+<h2>Send a Thanks Message 🚀</h2>
 
-// allow requests from your local html file / browser
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  next();
-});
+<input type="text" id="msg" placeholder="Type your message here" />
+<button onclick="sendData()">Send</button>
 
-const PORT = process.env.PORT || 3000;
+<p id="status"></p>
 
-let thanksMessages = [
-  { id: 1, message: "Thank you for helping me!" },
-  { id: 2, message: "Grateful for your support 🙏" }
-];
+<h3>Messages</h3>
+<ul id="messages"></ul>
 
-app.get("/", (req, res) => {
-  res.send("My backend is LIVE!");
-});
+<script>
+window.onload = loadMessages;
 
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API is working 🚀" });
-});
+function loadMessages() {
+  fetch("https://onlythankx-backend-clean-production.up.railway.app/api/thanks")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("messages");
+      list.innerHTML = "";
 
-app.get("/api/thanks", (req, res) => {
-  res.json(thanksMessages);
-});
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item.message;
+        list.appendChild(li);
+      });
+    })
+    .catch(err => {
+      document.getElementById("status").textContent = "Error loading messages";
+      console.error(err);
+    });
+}
 
-app.post("/api/thanks", (req, res) => {
-  const newMessage = {
-    id: thanksMessages.length + 1,
-    message: req.body.message
-  };
+function sendData() {
+  const message = document.getElementById("msg").value;
 
-  thanksMessages.push(newMessage);
+  fetch("https://onlythankx-backend-clean-production.up.railway.app/api/thanks", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message })
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("status").textContent = "Sent: " + data.message;
+      document.getElementById("msg").value = "";
+      loadMessages();
+    })
+    .catch(err => {
+      document.getElementById("status").textContent = "Send failed";
+      console.error(err);
+    });
+}
+</script>
 
-  res.json(newMessage);
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+</body>
+</html>
